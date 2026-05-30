@@ -1,0 +1,14 @@
+{
+  "name": "water-tracker-server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
