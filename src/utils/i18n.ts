@@ -25,6 +25,16 @@ export interface Translations {
   largeCup: string;
   today: string;
   weekDays: string[];
+  friends: string;
+  addFriend: string;
+  searchPlaceholder: string;
+  search: string;
+  add: string;
+  remove: string;
+  noFriends: string;
+  friendId: string;
+  todayDrank: string;
+  friendRecords: string;
 }
 
 const zh: Translations = {
@@ -52,6 +62,16 @@ const zh: Translations = {
   largeCup: "大杯",
   today: "今天",
   weekDays: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+  friends: "好友",
+  addFriend: "添加好友",
+  searchPlaceholder: "输入好友ID或用户名",
+  search: "搜索",
+  add: "添加",
+  remove: "删除",
+  noFriends: "还没有好友，添加一个吧",
+  friendId: "我的ID",
+  todayDrank: "今日喝了",
+  friendRecords: "好友动态",
 };
 
 const en: Translations = {
@@ -79,6 +99,16 @@ const en: Translations = {
   largeCup: "Large",
   today: "Today",
   weekDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  friends: "Friends",
+  addFriend: "Add Friend",
+  searchPlaceholder: "Enter friend's ID or name",
+  search: "Search",
+  add: "Add",
+  remove: "Remove",
+  noFriends: "No friends yet, add one!",
+  friendId: "My ID",
+  todayDrank: "drank today",
+  friendRecords: "Friend Activity",
 };
 
 const my: Translations = {
@@ -106,6 +136,16 @@ const my: Translations = {
   largeCup: "အကြီး",
   today: "ယနေ့",
   weekDays: ["တနင်္ဂနွေ", "တနင်္လာ", "အင်္ဂါ", "ဗုဒ္ဓဟူး", "ကြာသပတေး", "သောကြာ", "စနေ"],
+  friends: "သူငယ်ချင်း",
+  addFriend: "သူငယ်ချင်းထည့်ရန်",
+  searchPlaceholder: "ID သို့မဟုတ် အမည်ထည့်ပါ",
+  search: "ရှာရန်",
+  add: "ထည့်ရန်",
+  remove: "ဖယ်ရှားရန်",
+  noFriends: "သူငယ်ချင်းမရှိသေးပါ",
+  friendId: "ကျွန်ုပ်၏ ID",
+  todayDrank: "ယနေ့သောက်ပမာဏ",
+  friendRecords: "သူငယ်ချင်းလှုပ်ရှားမှု",
 };
 
 const allTranslations: Record<Language, Translations> = { zh, en, my };

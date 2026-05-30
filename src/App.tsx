@@ -4,6 +4,7 @@ import TipCard from "./components/TipCard";
 import ProgressRing from "./components/ProgressRing";
 import HistoryList from "./components/HistoryList";
 import YesterdayEditor from "./components/YesterdayEditor";
+import FriendsPanel from "./components/FriendsPanel";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import { getRandomTip } from "./utils/waterTips";
 import { useLanguage } from "./contexts/LanguageContext";
@@ -170,7 +171,13 @@ const App: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
             <div className="ml-auto flex items-center gap-3">
               <span className="text-sm text-gray-500">{user.userName}</span>
-              <span className="text-xs text-gray-300 bg-gray-100 px-2 py-0.5 rounded">{user.uid}</span>
+              <button
+                onClick={() => { navigator.clipboard.writeText(user.uid); }}
+                className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded hover:bg-blue-100 hover:text-blue-500 transition-colors"
+                title={t.friendId + ": " + user.uid}
+              >
+                ID: {user.uid}
+              </button>
               <LanguageSwitcher />
             </div>
           </div>
@@ -216,6 +223,10 @@ const App: React.FC = () => {
 
         <div className="mb-4">
           <YesterdayEditor records={yesterdayRecords} onChanged={refreshData} />
+        </div>
+
+        <div className="mb-4">
+          <FriendsPanel currentUserId={user.uid} />
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm p-5">
