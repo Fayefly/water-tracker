@@ -35,6 +35,16 @@ async function initDb() {
     )
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_checkin_user_ts ON checkin_records(user_id, timestamp)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(uid),
+      endpoint TEXT NOT NULL UNIQUE,
+      p256dh TEXT NOT NULL,
+      auth TEXT NOT NULL,
+      created_at BIGINT NOT NULL
+    )
+  `);
 }
 
 function generateShortId() {
@@ -178,6 +188,29 @@ async function clearTodayRecords(userId) {
   );
 }
 
+async function savePushSubscription(userId, endpoint, p256dh, auth) {
+  await pool.query(
+    `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, created_at)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (endpoint) DO UPDATE SET user_id = $1, p256dh = $3, auth = $4`,
+    [userId, endpoint, p256dh, auth, Date.now()]
+  );
+}
+
+async function getPushSubscriptions(userIds) {
+  if (userIds.length === 0) return [];
+  const placeholders = userIds.map((_, i) => `$${i + 1}`).join(',');
+  const { rows } = await pool.query(
+    `SELECT * FROM push_subscriptions WHERE user_id IN (${placeholders})`,
+    userIds
+  );
+  return rows;
+}
+
+async function removePushSubscription(endpoint) {
+  await pool.query('DELETE FROM push_subscriptions WHERE endpoint = $1', [endpoint]);
+}
+
 module.exports = {
   pool,
   initDb,
@@ -196,4 +229,7 @@ module.exports = {
   getUserRecordsInRange,
   deleteCheckin,
   clearTodayRecords,
+  savePushSubscription,
+  getPushSubscriptions,
+  removePushSubscription,
 };

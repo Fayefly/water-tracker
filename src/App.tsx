@@ -21,6 +21,7 @@ import {
   DaySummary,
   CheckInRecord,
 } from "./utils/api";
+import { registerPushNotification } from "./utils/pushNotification";
 
 const DAILY_GOAL = 2000;
 
@@ -133,7 +134,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     refreshData();
-  }, [refreshData]);
+    if (user) {
+      registerPushNotification(user.uid);
+    }
+  }, [refreshData, user]);
 
   const handleCheckIn = async (amount: number) => {
     if (!user) return;

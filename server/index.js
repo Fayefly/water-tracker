@@ -1,6 +1,15 @@
 const express = require('express');
 const path = require('path');
+const webpush = require('web-push');
 const db = require('./db');
+
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL || 'mailto:water@example.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -95,6 +104,25 @@ app.post('/api/friends/remove', async (req, res) => {
   }
 });
 
+app.get('/api/push/vapid-key', (req, res) => {
+  res.json({ publicKey: process.env.VAPID_PUBLIC_KEY || '' });
+});
+
+app.post('/api/push/subscribe', async (req, res) => {
+  try {
+    const { userId, subscription } = req.body;
+    if (!userId || !subscription || !subscription.endpoint) {
+      return res.status(400).json({ error: '参数不完整' });
+    }
+    const keys = subscription.keys || {};
+    await db.savePushSubscription(userId, subscription.endpoint, keys.p256dh || '', keys.auth || '');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('push subscribe error:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+});
+
 app.post('/api/checkin', async (req, res) => {
   try {
     const { userId, userName, amount, tip, timestamp } = req.body;
@@ -103,6 +131,34 @@ app.post('/api/checkin', async (req, res) => {
     }
     const record = await db.addCheckin(userId, userName || userId, amount, tip || '', timestamp);
     res.json({ record: { id: record.id, userId: record.user_id, userName: record.user_name, amount: record.amount, timestamp: record.timestamp, tip: record.tip } });
+
+    // Push notification to friends (non-blocking)
+    if (process.env.VAPID_PUBLIC_KEY) {
+      setImmediate(async () => {
+        try {
+          const friendIds = await db.getFriendIds(userId);
+          if (friendIds.length === 0) return;
+          const subs = await db.getPushSubscriptions(friendIds);
+          const payload = JSON.stringify({
+            title: '💧 好友喝水了',
+            body: `${userName || userId} 刚喝了 ${amount}ml 水！`,
+          });
+          for (const sub of subs) {
+            const pushSub = {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            };
+            webpush.sendNotification(pushSub, payload).catch(err => {
+              if (err.statusCode === 410 || err.statusCode === 404) {
+                db.removePushSubscription(sub.endpoint);
+              }
+            });
+          }
+        } catch (err) {
+          console.error('push notify error:', err);
+        }
+      });
+    }
   } catch (err) {
     console.error('checkin error:', err);
     res.status(500).json({ error: '服务器错误' });
