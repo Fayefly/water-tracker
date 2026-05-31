@@ -108,6 +108,35 @@ app.get('/api/push/vapid-key', (req, res) => {
   res.json({ publicKey: process.env.VAPID_PUBLIC_KEY || '' });
 });
 
+app.get('/api/push/debug/:uid', async (req, res) => {
+  try {
+    const subs = await db.getPushSubscriptions([req.params.uid]);
+    res.json({ count: subs.length, subscriptions: subs.map(s => ({ user_id: s.user_id, endpoint: s.endpoint.slice(0, 50) + '...' })) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/push/test/:uid', async (req, res) => {
+  try {
+    const subs = await db.getPushSubscriptions([req.params.uid]);
+    if (subs.length === 0) return res.json({ error: 'No subscriptions found', count: 0 });
+    const payload = JSON.stringify({ title: '💧 测试通知', body: '如果你看到这条，说明推送正常工作！' });
+    const results = [];
+    for (const sub of subs) {
+      try {
+        await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+        results.push({ endpoint: sub.endpoint.slice(0, 50), status: 'sent' });
+      } catch (err) {
+        results.push({ endpoint: sub.endpoint.slice(0, 50), status: 'failed', error: err.message });
+      }
+    }
+    res.json({ results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/push/subscribe', async (req, res) => {
   try {
     const { userId, subscription } = req.body;
