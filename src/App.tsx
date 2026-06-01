@@ -111,6 +111,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<RegisteredUser | null>(getCurrentUser());
   const [currentTip, setCurrentTip] = useState("");
   const [showTip, setShowTip] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [myTotal, setMyTotal] = useState(0);
   const [history, setHistory] = useState<DaySummary[]>([]);
   const [yesterdayRecords, setYesterdayRecords] = useState<CheckInRecord[]>([]);
@@ -177,12 +178,14 @@ const App: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
             <div className="ml-auto flex items-center gap-3">
               <span className="text-sm text-gray-500">{user.userName}</span>
-              <button
-                onClick={() => { navigator.clipboard.writeText(user.uid); }}
-                className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded hover:bg-blue-100 hover:text-blue-500 transition-colors"
-                title={t.friendId + ": " + user.uid}
-              >
+              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
                 ID: {user.uid}
+              </span>
+              <button
+                onClick={() => { navigator.clipboard.writeText(user.uid); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                className={`text-xs px-2 py-0.5 rounded transition-all ${copied ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-500"}`}
+              >
+                {copied ? (language === "zh" ? "已复制" : "Copied!") : (language === "zh" ? "复制" : "Copy")}
               </button>
               <LanguageSwitcher />
             </div>
