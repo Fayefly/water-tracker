@@ -178,14 +178,12 @@ const App: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
             <div className="ml-auto flex items-center gap-3">
               <span className="text-sm text-gray-500">{user.userName}</span>
-              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-                ID: {user.uid}
-              </span>
               <button
                 onClick={() => { navigator.clipboard.writeText(user.uid); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className={`text-xs px-2 py-0.5 rounded transition-all ${copied ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-500"}`}
+                className={`text-xs px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1.5 ${copied ? "bg-green-50 border-green-200 text-green-600" : "bg-white border-gray-200 text-blue-500 hover:border-blue-300 hover:bg-blue-50"}`}
               >
-                {copied ? (language === "zh" ? "已复制" : "Copied!") : (language === "zh" ? "复制" : "Copy")}
+                <span className="text-gray-400">ID: {user.uid}</span>
+                <i className={`fa-solid ${copied ? "fa-check" : "fa-copy"} text-[10px]`}></i>
               </button>
               <LanguageSwitcher />
             </div>
