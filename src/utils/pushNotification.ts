@@ -9,37 +9,37 @@ export async function registerPushNotification(userId: string): Promise<boolean>
     console.log("[Push] Permission:", permission);
     if (permission !== "granted") return false;
 
-    const registration = await navigator.serviceWorker.register("/sw.js");
-    console.log("[Push] SW registered");
-
+    await navigator.serviceWorker.register("/sw.js");
     const ready = await navigator.serviceWorker.ready;
     console.log("[Push] SW ready");
 
     const res = await fetch("/api/push/vapid-key");
     const { publicKey } = await res.json();
-    console.log("[Push] VAPID key:", publicKey ? "present" : "MISSING");
-    if (!publicKey) return false;
-
-    // Unsubscribe old subscription if exists (might have wrong key)
-    const existing = await ready.pushManager.getSubscription();
-    if (existing) {
-      console.log("[Push] Unsubscribing old subscription");
-      await existing.unsubscribe();
+    if (!publicKey) {
+      console.log("[Push] No VAPID key from server");
+      return false;
     }
 
-    const subscription = await ready.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
-    });
-    console.log("[Push] Subscribed:", subscription.endpoint.slice(0, 50));
+    // Use existing subscription if available, otherwise create new
+    let subscription = await ready.pushManager.getSubscription();
+    console.log("[Push] Existing subscription:", subscription ? "yes" : "no");
 
+    if (!subscription) {
+      subscription = await ready.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      console.log("[Push] New subscription created");
+    }
+
+    // Send to server
     const resp = await fetch("/api/push/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, subscription: subscription.toJSON() }),
     });
     const result = await resp.json();
-    console.log("[Push] Server response:", result);
+    console.log("[Push] Saved to server:", result);
 
     return true;
   } catch (err) {
