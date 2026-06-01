@@ -39,8 +39,8 @@ const FriendsPanel: React.FC<FriendsPanelProps> = ({ currentUserId }) => {
   }, [currentUserId]);
 
   useEffect(() => {
-    if (expanded) refreshFriends();
-  }, [expanded, refreshFriends]);
+    refreshFriends();
+  }, [refreshFriends]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -81,6 +81,9 @@ const FriendsPanel: React.FC<FriendsPanelProps> = ({ currentUserId }) => {
     }
   };
 
+  const getFriendTotal = (uid: string) =>
+    friendRecords.filter((r) => r.userId === uid).reduce((sum, r) => sum + r.amount, 0);
+
   return (
     <div className="bg-white rounded-3xl shadow-sm p-5">
       <button
@@ -98,6 +101,27 @@ const FriendsPanel: React.FC<FriendsPanelProps> = ({ currentUserId }) => {
           }`}
         ></i>
       </button>
+
+      {/* Always show friends' drinking status */}
+      {friends.length > 0 && !expanded && (
+        <div className="mt-3 space-y-1.5">
+          {friends.map((friend) => {
+            const total = getFriendTotal(friend.uid);
+            return (
+              <div key={friend.uid} className="flex items-center gap-2 px-1">
+                <span className="text-sm text-gray-600">{friend.userName}</span>
+                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-300 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min((total / 2000) * 100, 100)}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-gray-400 w-14 text-right">{total}ml</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {expanded && (
         <div className="mt-4 space-y-4">
@@ -148,9 +172,7 @@ const FriendsPanel: React.FC<FriendsPanelProps> = ({ currentUserId }) => {
           ) : (
             <div className="space-y-2">
               {friends.map((friend) => {
-                const total = friendRecords
-                  .filter((r) => r.userId === friend.uid)
-                  .reduce((sum, r) => sum + r.amount, 0);
+                const total = getFriendTotal(friend.uid);
                 return (
                   <div
                     key={friend.uid}

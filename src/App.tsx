@@ -137,6 +137,8 @@ const App: React.FC = () => {
     if (user) {
       registerPushNotification(user.uid);
     }
+    const interval = setInterval(refreshData, 30000);
+    return () => clearInterval(interval);
   }, [refreshData, user]);
 
   const handleCheckIn = async (amount: number) => {
