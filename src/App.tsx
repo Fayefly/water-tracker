@@ -26,14 +26,14 @@ import { registerPushNotification } from "./utils/pushNotification";
 const DAILY_GOAL = 2000;
 
 const WATER_LEVEL_IMAGES = {
-  empty: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/3af651ca-0fa4-469d-a458-7670db830cf7.jpg",
-  oneSixth: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/347beafe-ffb7-4339-b429-b2079d524da1.jpg",
-  oneThird: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/8483b423-d2ff-4a6c-bb96-e4b47667d956.jpg",
-  oneHalf: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/55c269a1-1e98-45ca-a21b-509855a4841c.jpg",
-  twoThirds: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/f8392636-76b8-4e3c-a537-fe09631b2b64.jpg",
-  fiveSixths: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/bf65f14a-32de-45fa-a724-13cde6daf5e5.jpg",
-  full: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/ce9c2b6c-b4f0-4169-92ae-1bc58c7e94a9.jpg",
-  overflow: "https://oneday-react-native.oss-cn-zhangjiakou.aliyuncs.com/oneday/source/4b35e4b6-5ab1-48e9-9058-fb7cedb3a88d.jpg",
+  empty: "/images/water-empty.png",
+  oneSixth: "/images/water-one-sixth.png",
+  oneThird: "/images/water-one-third.png",
+  oneHalf: "/images/water-one-half.png",
+  twoThirds: "/images/water-two-thirds.png",
+  fiveSixths: "/images/water-five-sixths.png",
+  full: "/images/water-full.png",
+  overflow: "/images/water-overflow.png",
 };
 
 function getWaterLevelImage(current: number, goal: number): string {
@@ -205,7 +205,6 @@ const App: React.FC = () => {
                 src={getWaterLevelImage(myTotal, DAILY_GOAL)}
                 alt="water"
                 className="w-28 h-28 object-contain transition-all duration-500"
-                style={{ mixBlendMode: "multiply" }}
               />
               <p className="mt-2 text-sm font-medium text-gray-700">{t.myDrinking}</p>
               <p className="text-xs text-gray-400 mt-0.5">

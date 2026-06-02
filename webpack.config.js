@@ -63,7 +63,8 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: 'public/sw.js', to: 'sw.js' }
+        { from: 'public/sw.js', to: 'sw.js' },
+        { from: 'public/images', to: 'images' }
       ]
     })
   ]
