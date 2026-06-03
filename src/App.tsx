@@ -224,7 +224,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="mb-4">
-          <TipCard tip={currentTip} visible={showTip} />
+          <TipCard tip={currentTip} visible={showTip} userId={user.uid} />
         </div>
 
         <div className="mb-4">

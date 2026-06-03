@@ -90,6 +90,17 @@ export async function checkin(
   return data;
 }
 
+export async function rateJoke(
+  userId: string,
+  joke: string,
+  rating: "like" | "dislike"
+): Promise<void> {
+  await request("/joke/rate", {
+    method: "POST",
+    body: JSON.stringify({ userId, joke, rating }),
+  });
+}
+
 export async function getTodayTotal(uid: string): Promise<number> {
   const data = await request<{ total: number }>(`/today-total/${uid}`);
   return data.total;

@@ -36,6 +36,15 @@ async function initDb() {
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_checkin_user_ts ON checkin_records(user_id, timestamp)`);
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS joke_ratings (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(uid),
+      joke_text TEXT NOT NULL,
+      rating TEXT NOT NULL,
+      created_at BIGINT NOT NULL
+    )
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS pending_jokes (
       user_id TEXT PRIMARY KEY REFERENCES users(uid),
       joke TEXT NOT NULL,
@@ -195,6 +204,29 @@ async function clearTodayRecords(userId) {
   );
 }
 
+async function saveJokeRating(userId, jokeText, rating) {
+  await pool.query(
+    'INSERT INTO joke_ratings (user_id, joke_text, rating, created_at) VALUES ($1, $2, $3, $4)',
+    [userId, jokeText, rating, Date.now()]
+  );
+}
+
+async function getRecentLikedJokes(limit) {
+  const { rows } = await pool.query(
+    "SELECT DISTINCT joke_text FROM joke_ratings WHERE rating = 'like' ORDER BY created_at DESC LIMIT $1",
+    [limit]
+  );
+  return rows.map(r => r.joke_text);
+}
+
+async function getRecentDislikedJokes(limit) {
+  const { rows } = await pool.query(
+    "SELECT DISTINCT joke_text FROM joke_ratings WHERE rating = 'dislike' ORDER BY created_at DESC LIMIT $1",
+    [limit]
+  );
+  return rows.map(r => r.joke_text);
+}
+
 async function getPendingJoke(userId) {
   const { rows } = await pool.query('SELECT joke FROM pending_jokes WHERE user_id = $1', [userId]);
   return rows[0]?.joke || null;
@@ -249,6 +281,9 @@ module.exports = {
   getUserRecordsInRange,
   deleteCheckin,
   clearTodayRecords,
+  saveJokeRating,
+  getRecentLikedJokes,
+  getRecentDislikedJokes,
   getPendingJoke,
   savePendingJoke,
   savePushSubscription,

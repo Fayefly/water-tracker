@@ -153,6 +153,20 @@ app.post('/api/push/subscribe', async (req, res) => {
   }
 });
 
+app.post('/api/joke/rate', async (req, res) => {
+  try {
+    const { userId, joke, rating } = req.body;
+    if (!userId || !joke || !['like', 'dislike'].includes(rating)) {
+      return res.status(400).json({ error: '参数不完整' });
+    }
+    await db.saveJokeRating(userId, joke, rating);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('joke rate error:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+});
+
 app.post('/api/checkin', async (req, res) => {
   try {
     const { userId, userName, amount, tip, timestamp } = req.body;
