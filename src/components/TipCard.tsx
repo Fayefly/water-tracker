@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { rateJoke, getNewJoke } from "../utils/api";
 
 interface TipCardProps {
@@ -12,6 +12,14 @@ const TipCard: React.FC<TipCardProps> = ({ tip, visible, userId }) => {
   const [currentTip, setCurrentTip] = useState(tip);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    if (tip) {
+      setCurrentTip(tip);
+      setRated(null);
+      setFeedback("");
+    }
+  }, [tip]);
 
   if (!visible || !currentTip) return null;
 
