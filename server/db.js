@@ -191,6 +191,20 @@ async function getUserRecordsInRange(userId, startTs, endTs) {
   return rows;
 }
 
+async function getUserRecordsLast7Days(userId) {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  const { rows } = await pool.query(
+    `SELECT * FROM checkin_records
+     WHERE user_id = $1 AND timestamp >= $2
+     ORDER BY timestamp DESC`,
+    [userId, sevenDaysAgo.getTime()]
+  );
+  return rows;
+}
+
 async function deleteCheckin(recordId, userId) {
   await pool.query('DELETE FROM checkin_records WHERE id = $1 AND user_id = $2', [recordId, userId]);
 }
@@ -213,7 +227,7 @@ async function saveJokeRating(userId, jokeText, rating) {
 
 async function getRecentLikedJokes(limit) {
   const { rows } = await pool.query(
-    "SELECT DISTINCT joke_text FROM joke_ratings WHERE rating = 'like' ORDER BY created_at DESC LIMIT $1",
+    "SELECT joke_text, MAX(created_at) AS latest FROM joke_ratings WHERE rating = 'like' GROUP BY joke_text ORDER BY latest DESC LIMIT $1",
     [limit]
   );
   return rows.map(r => r.joke_text);
@@ -221,7 +235,7 @@ async function getRecentLikedJokes(limit) {
 
 async function getRecentDislikedJokes(limit) {
   const { rows } = await pool.query(
-    "SELECT DISTINCT joke_text FROM joke_ratings WHERE rating = 'dislike' ORDER BY created_at DESC LIMIT $1",
+    "SELECT joke_text, MAX(created_at) AS latest FROM joke_ratings WHERE rating = 'dislike' GROUP BY joke_text ORDER BY latest DESC LIMIT $1",
     [limit]
   );
   return rows.map(r => r.joke_text);
@@ -279,6 +293,7 @@ module.exports = {
   getRecordsSince,
   getTodayTotal,
   getUserRecordsInRange,
+  getUserRecordsLast7Days,
   deleteCheckin,
   clearTodayRecords,
   saveJokeRating,

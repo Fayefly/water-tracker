@@ -109,35 +109,6 @@ app.get('/api/push/vapid-key', (req, res) => {
   res.json({ publicKey: process.env.VAPID_PUBLIC_KEY || '' });
 });
 
-app.get('/api/push/debug/:uid', async (req, res) => {
-  try {
-    const subs = await db.getPushSubscriptions([req.params.uid]);
-    res.json({ count: subs.length, subscriptions: subs.map(s => ({ user_id: s.user_id, endpoint: s.endpoint.slice(0, 50) + '...' })) });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/push/test/:uid', async (req, res) => {
-  try {
-    const subs = await db.getPushSubscriptions([req.params.uid]);
-    if (subs.length === 0) return res.json({ error: 'No subscriptions found', count: 0 });
-    const payload = JSON.stringify({ title: '💧 测试通知', body: '如果你看到这条，说明推送正常工作！' });
-    const results = [];
-    for (const sub of subs) {
-      try {
-        await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
-        results.push({ endpoint: sub.endpoint.slice(0, 50), status: 'sent' });
-      } catch (err) {
-        results.push({ endpoint: sub.endpoint.slice(0, 50), status: 'failed', error: err.message });
-      }
-    }
-    res.json({ results });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.post('/api/push/subscribe', async (req, res) => {
   try {
     const { userId, subscription } = req.body;
@@ -145,7 +116,10 @@ app.post('/api/push/subscribe', async (req, res) => {
       return res.status(400).json({ error: '参数不完整' });
     }
     const keys = subscription.keys || {};
-    await db.savePushSubscription(userId, subscription.endpoint, keys.p256dh || '', keys.auth || '');
+    if (!keys.p256dh || !keys.auth) {
+      return res.status(400).json({ error: '订阅信息不完整' });
+    }
+    await db.savePushSubscription(userId, subscription.endpoint, keys.p256dh, keys.auth);
     res.json({ success: true });
   } catch (err) {
     console.error('push subscribe error:', err);
@@ -184,12 +158,13 @@ app.post('/api/checkin', async (req, res) => {
     if (!userId || !amount) {
       return res.status(400).json({ error: '参数不完整' });
     }
+    const isBackfill = !!timestamp;
     const record = await db.addCheckin(userId, userName || userId, amount, tip || '', timestamp);
-    const joke = await getJokeForUser(userId);
+    const joke = isBackfill ? null : await getJokeForUser(userId);
     res.json({ record: { id: record.id, userId: record.user_id, userName: record.user_name, amount: record.amount, timestamp: record.timestamp, tip: record.tip }, joke });
 
-    // Push notification to friends (non-blocking)
-    if (process.env.VAPID_PUBLIC_KEY) {
+    // Push notification to friends (non-blocking, skip for backfill)
+    if (process.env.VAPID_PUBLIC_KEY && !isBackfill) {
       setImmediate(async () => {
         try {
           const friendIds = await db.getFriendIds(userId);
@@ -254,6 +229,7 @@ app.get('/api/today-total/:uid', async (req, res) => {
 app.get('/api/history/:uid', async (req, res) => {
   try {
     const uid = req.params.uid;
+    const allRecords = await db.getUserRecordsLast7Days(uid);
     const days = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
@@ -262,7 +238,7 @@ app.get('/api/history/:uid', async (req, res) => {
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(date);
       dayEnd.setHours(23, 59, 59, 999);
-      const records = await db.getUserRecordsInRange(uid, dayStart.getTime(), dayEnd.getTime());
+      const records = allRecords.filter(r => r.timestamp >= dayStart.getTime() && r.timestamp <= dayEnd.getTime());
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       days.push({
         date: dateStr,

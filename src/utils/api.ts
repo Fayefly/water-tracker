@@ -39,11 +39,6 @@ export async function register(userName: string): Promise<RegisteredUser> {
   return data.user;
 }
 
-export async function getUser(uid: string): Promise<RegisteredUser> {
-  const data = await request<{ user: RegisteredUser }>(`/user/${uid}`);
-  return data.user;
-}
-
 export async function searchUser(query: string): Promise<RegisteredUser> {
   const data = await request<{ user: RegisteredUser }>("/friends/search", {
     method: "POST",
@@ -181,6 +176,3 @@ export function setCurrentUser(user: RegisteredUser): void {
   localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
 }
 
-export function clearCurrentUser(): void {
-  localStorage.removeItem(CURRENT_USER_KEY);
-}

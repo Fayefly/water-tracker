@@ -35,6 +35,12 @@ export interface Translations {
   friendId: string;
   todayDrank: string;
   friendRecords: string;
+  coldJoke: string;
+  jokeLike: string;
+  jokeDislike: string;
+  feedbackSent: string;
+  feedbackSentSwitch: string;
+  jokeLoading: string;
 }
 
 const zh: Translations = {
@@ -72,6 +78,12 @@ const zh: Translations = {
   friendId: "我的ID",
   todayDrank: "今日喝了",
   friendRecords: "好友动态",
+  coldJoke: "冷笑话",
+  jokeLike: "哈哈哈哈",
+  jokeDislike: "啥玩意",
+  feedbackSent: "已提交反馈",
+  feedbackSentSwitch: "已提交反馈，换一个...",
+  jokeLoading: "换一个...",
 };
 
 const en: Translations = {
@@ -109,6 +121,12 @@ const en: Translations = {
   friendId: "My ID",
   todayDrank: "drank today",
   friendRecords: "Friend Activity",
+  coldJoke: "Cold Joke",
+  jokeLike: "LOL",
+  jokeDislike: "Meh",
+  feedbackSent: "Feedback sent",
+  feedbackSentSwitch: "Feedback sent, loading...",
+  jokeLoading: "Loading...",
 };
 
 const my: Translations = {
@@ -146,6 +164,12 @@ const my: Translations = {
   friendId: "ကျွန်ုပ်၏ ID",
   todayDrank: "ယနေ့သောက်ပမာဏ",
   friendRecords: "သူငယ်ချင်းလှုပ်ရှားမှု",
+  coldJoke: "ဟာသ",
+  jokeLike: "ရယ်စရာကောင်း",
+  jokeDislike: "ဘာလဲ",
+  feedbackSent: "တုံ့ပြန်ချက်ပို့ပြီး",
+  feedbackSentSwitch: "တုံ့ပြန်ချက်ပို့ပြီး...",
+  jokeLoading: "ပြောင်းနေသည်...",
 };
 
 const allTranslations: Record<Language, Translations> = { zh, en, my };
