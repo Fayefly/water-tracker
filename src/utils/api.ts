@@ -90,6 +90,13 @@ export async function checkin(
   return data;
 }
 
+export async function getNewJoke(): Promise<string | null> {
+  const data = await request<{ joke: string | null }>("/joke/new", {
+    method: "POST",
+  });
+  return data.joke;
+}
+
 export async function rateJoke(
   userId: string,
   joke: string,

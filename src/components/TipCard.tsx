@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { rateJoke } from "../utils/api";
+import { rateJoke, getNewJoke } from "../utils/api";
 
 interface TipCardProps {
   tip: string;
@@ -9,15 +9,27 @@ interface TipCardProps {
 
 const TipCard: React.FC<TipCardProps> = ({ tip, visible, userId }) => {
   const [rated, setRated] = useState<"like" | "dislike" | null>(null);
+  const [currentTip, setCurrentTip] = useState(tip);
+  const [loading, setLoading] = useState(false);
 
-  if (!visible || !tip) return null;
+  if (!visible || !currentTip) return null;
 
   const handleRate = async (rating: "like" | "dislike") => {
     setRated(rating);
     try {
-      await rateJoke(userId, tip, rating);
+      await rateJoke(userId, currentTip, rating);
+      if (rating === "dislike") {
+        setLoading(true);
+        const newJoke = await getNewJoke();
+        if (newJoke) {
+          setCurrentTip(newJoke);
+          setRated(null);
+        }
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Rate failed:", err);
+      setLoading(false);
     }
   };
 
@@ -27,11 +39,13 @@ const TipCard: React.FC<TipCardProps> = ({ tip, visible, userId }) => {
         <i className="fa-solid fa-face-laugh-squint text-amber-500"></i>
         <h2 className="text-base font-semibold text-amber-600">冷笑话</h2>
       </div>
-      <p className="text-sm text-gray-600 leading-relaxed mb-3">{tip}</p>
-      <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
+      <p className="text-sm text-gray-600 leading-relaxed mb-3">
+        {loading ? "换一个..." : currentTip}
+      </p>
+      <div className="flex items-center justify-center gap-6 pt-2 border-t border-gray-100">
         <button
           onClick={() => handleRate("like")}
-          disabled={rated !== null}
+          disabled={rated !== null || loading}
           className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-all ${
             rated === "like"
               ? "bg-green-50 text-green-600"
@@ -45,7 +59,7 @@ const TipCard: React.FC<TipCardProps> = ({ tip, visible, userId }) => {
         </button>
         <button
           onClick={() => handleRate("dislike")}
-          disabled={rated !== null}
+          disabled={rated !== null || loading}
           className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-all ${
             rated === "dislike"
               ? "bg-red-50 text-red-400"

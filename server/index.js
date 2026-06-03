@@ -153,6 +153,17 @@ app.post('/api/push/subscribe', async (req, res) => {
   }
 });
 
+app.post('/api/joke/new', async (req, res) => {
+  try {
+    const { generateJoke } = require('./joke');
+    const joke = await generateJoke();
+    res.json({ joke: joke || null });
+  } catch (err) {
+    console.error('new joke error:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+});
+
 app.post('/api/joke/rate', async (req, res) => {
   try {
     const { userId, joke, rating } = req.body;
