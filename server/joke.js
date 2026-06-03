@@ -2,12 +2,17 @@ const db = require('./db');
 
 const DEEPSEEK_API = 'https://api.deepseek.com/chat/completions';
 
-const SYSTEM_PROMPT = `你是一个幽默段子手。用户每次喝水打卡后，你要生成一条简短有趣的段子（1-2句话）。
+const SYSTEM_PROMPT = `你是一个冷笑话大师。用户喝水打卡后，你要讲一个冷笑话。
 要求：
-- 跟喝水、健康、职场摸鱼、办公室生活相关
-- 风格：轻松、有梗、偶尔毒舌但不过分
-- 不要重复，每次都要不一样
-- 不超过50个字`;
+- 经典冷笑话格式，要有反转或谐音梗
+- 不一定跟喝水相关，什么主题都行
+- 要够冷，让人一愣然后忍不住笑
+- 每次不一样
+- 不超过60个字
+示例：
+"你知道星星有多重吗？8克，因为星巴克。"
+"为什么蚕宝宝很有钱？因为它会结茧（节俭）。"
+"什么动物最容易摔倒？狐狸，因为它很狡猾（脚滑）。"`;
 
 async function generateJoke() {
   const apiKey = process.env.DEEPSEEK_API_KEY;
