@@ -36,6 +36,13 @@ async function initDb() {
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_checkin_user_ts ON checkin_records(user_id, timestamp)`);
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS pending_jokes (
+      user_id TEXT PRIMARY KEY REFERENCES users(uid),
+      joke TEXT NOT NULL,
+      created_at BIGINT NOT NULL
+    )
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS push_subscriptions (
       id SERIAL PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(uid),
@@ -188,6 +195,19 @@ async function clearTodayRecords(userId) {
   );
 }
 
+async function getPendingJoke(userId) {
+  const { rows } = await pool.query('SELECT joke FROM pending_jokes WHERE user_id = $1', [userId]);
+  return rows[0]?.joke || null;
+}
+
+async function savePendingJoke(userId, joke) {
+  await pool.query(
+    `INSERT INTO pending_jokes (user_id, joke, created_at) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id) DO UPDATE SET joke = $2, created_at = $3`,
+    [userId, joke, Date.now()]
+  );
+}
+
 async function savePushSubscription(userId, endpoint, p256dh, auth) {
   await pool.query(
     `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, created_at)
@@ -229,6 +249,8 @@ module.exports = {
   getUserRecordsInRange,
   deleteCheckin,
   clearTodayRecords,
+  getPendingJoke,
+  savePendingJoke,
   savePushSubscription,
   getPushSubscriptions,
   removePushSubscription,

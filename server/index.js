@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const webpush = require('web-push');
 const db = require('./db');
+const { getJokeForUser } = require('./joke');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -159,7 +160,8 @@ app.post('/api/checkin', async (req, res) => {
       return res.status(400).json({ error: '参数不完整' });
     }
     const record = await db.addCheckin(userId, userName || userId, amount, tip || '', timestamp);
-    res.json({ record: { id: record.id, userId: record.user_id, userName: record.user_name, amount: record.amount, timestamp: record.timestamp, tip: record.tip } });
+    const joke = await getJokeForUser(userId);
+    res.json({ record: { id: record.id, userId: record.user_id, userName: record.user_name, amount: record.amount, timestamp: record.timestamp, tip: record.tip }, joke });
 
     // Push notification to friends (non-blocking)
     if (process.env.VAPID_PUBLIC_KEY) {

@@ -146,8 +146,8 @@ const App: React.FC = () => {
     if (!user) return;
     const tip = getRandomTip(language);
     try {
-      await checkin(user.uid, user.userName, amount, tip);
-      setCurrentTip(tip);
+      const { joke } = await checkin(user.uid, user.userName, amount, tip);
+      setCurrentTip(joke || tip);
       setShowTip(true);
       await refreshData();
     } catch (err) {

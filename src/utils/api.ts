@@ -82,12 +82,12 @@ export async function checkin(
   userName: string,
   amount: number,
   tip: string
-): Promise<CheckInRecord> {
-  const data = await request<{ record: CheckInRecord }>("/checkin", {
+): Promise<{ record: CheckInRecord; joke: string | null }> {
+  const data = await request<{ record: CheckInRecord; joke: string | null }>("/checkin", {
     method: "POST",
     body: JSON.stringify({ userId, userName, amount, tip }),
   });
-  return data.record;
+  return data;
 }
 
 export async function getTodayTotal(uid: string): Promise<number> {
