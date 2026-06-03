@@ -171,8 +171,8 @@ app.post('/api/checkin', async (req, res) => {
           if (friendIds.length === 0) return;
           const subs = await db.getPushSubscriptions(friendIds);
           const payload = JSON.stringify({
-            title: '💧 好友喝水了',
-            body: `${userName || userId} 刚喝了 ${amount}ml 水！`,
+            title: '💧 喝水提醒',
+            body: `你的好友${userName || userId}喝水了，提醒你也喝水～`,
           });
           for (const sub of subs) {
             const pushSub = {
