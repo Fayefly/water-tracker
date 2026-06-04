@@ -44,7 +44,7 @@ export interface Translations {
 }
 
 const zh: Translations = {
-  title: "喝水打卡",
+  title: "喝水大师",
   subtitle: "养成健康饮水习惯",
   clearToday: "清空今日",
   myDrinking: "我今日饮水",
