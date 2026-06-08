@@ -70,7 +70,7 @@ const TipCard: React.FC<TipCardProps> = ({ tip, visible, userId }) => {
   return (
     <div className="bg-white rounded-3xl shadow-sm p-5">
       <div className="flex items-center gap-2 mb-3">
-        <i className="fa-solid fa-face-laugh-squint text-amber-500"></i>
+        <i className="fa-solid fa-quote-left text-amber-500"></i>
         <h2 className="text-base font-semibold text-amber-600">{t.coldJoke}</h2>
       </div>
       <p className="text-sm text-gray-600 leading-relaxed mb-3">
